@@ -7,7 +7,7 @@
 #endif
 
 #if !defined(__i386__)
-#error "This tutorial needs to be compiled with ix86-elf compiler"
+#error "This tutorial needs to be compiled with i686-elf compiler"
 #endif
 
 enum vga_color {
@@ -84,11 +84,45 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 
 void terminal_putchar(char c)
 {
+    if (c == '\n') {
+        terminal_column = 0;
+        if (++terminal_row == VGA_HEIGHT)
+            terminal_row = 0;
+        return;
+    }
     terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
     if (++terminal_column == VGA_WIDTH) {
         terminal_column = 0;
         if (++terminal_row == VGA_HEIGHT)
             terminal_row = 0;
+    }
+}
+
+void terminal_print_uint32(uint32_t x) {
+    if (x == 0) {
+        terminal_putchar('0');
+        return;
+    }
+    char digits[10] = { 0 };
+    int d = 0;
+    while (x != 0) {
+        char c = x % 10;
+        digits[d++] = c + '0';
+        x = x / 10;
+    }
+    for (int i = d-1; i >= 0; i--)
+        terminal_putchar(digits[i]);
+}
+
+void terminal_printf(const char *s, int x) {
+    size_t len = strlen(s);
+    for (size_t i = 0; i < len; i++) {
+        if (s[i] == '%') {
+            terminal_print_uint32(x);
+        }
+        else {
+            terminal_putchar(s[i]);
+        }
     }
 }
 
@@ -106,5 +140,7 @@ void terminal_writestring(const char *data)
 void kernel_main(void)
 {
     terminal_initialize();
-    terminal_writestring("Hello, kernel World!\n");
+    for (int i = 1; i <= 25; i++) {
+        terminal_printf("Hello, kernel World %!\n", i);
+    }
 }
