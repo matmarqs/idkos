@@ -1,3 +1,6 @@
+# development tools
+tools/
+
 # emacs files
 **/*~
 **/\#*
