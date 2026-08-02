@@ -1,5 +1,7 @@
 # development tools
 tools/
+**/myos
+**/*.iso
 
 # emacs files
 **/*~
