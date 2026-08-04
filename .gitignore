@@ -7,6 +7,10 @@ tools/
 **/*~
 **/\#*
 
+# vim files
+**/*.swp
+**/.*.swp
+
 
 # C files (GitHub template)
 
