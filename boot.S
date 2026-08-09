@@ -51,8 +51,8 @@ framebuffer_tag_start:
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long framebuffer_tag_end - framebuffer_tag_start
     /* let GRUB choose width, height and depth by setting 0 */
-    .long 0
-    .long 0
+    .long 1920
+    .long 1200
     .long 0
 framebuffer_tag_end:
 
