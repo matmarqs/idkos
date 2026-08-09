@@ -1,5 +1,6 @@
 /* reference: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html */
 
+#include "common.h"
 
 #define ASM_FILE 1  /* multiboot2 uses this def */
 #include "multiboot2.h"
@@ -51,8 +52,8 @@ framebuffer_tag_start:
     .short MULTIBOOT_HEADER_TAG_FRAMEBUFFER
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long framebuffer_tag_end - framebuffer_tag_start
-    .long 1024
-    .long 768
+    .long OS_WIDTH
+    .long OS_HEIGHT
     .long 32
 framebuffer_tag_end:
 
@@ -96,7 +97,7 @@ _start:
 
     /* Print the halt message */
     pushl $halt_message
-    call terminal_writestring
+    call term_writestring
 
     cli
 1:  hlt
