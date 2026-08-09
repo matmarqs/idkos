@@ -1,7 +1,5 @@
 /* reference: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html */
 
-#include "common.h"
-
 #define ASM_FILE 1  /* multiboot2 uses this def */
 #include "multiboot2.h"
 
@@ -14,7 +12,7 @@
     .section .multiboot
     .align 8
 
-multiboot_header:   
+multiboot_header:
     .long MULTIBOOT2_HEADER_MAGIC
     .long 0     /* 0 for i386 */
     /* header length */
@@ -25,7 +23,7 @@ multiboot_header:
 
 #ifndef __ELF__
 
-address_tag_start:  
+address_tag_start:
     .short MULTIBOOT_HEADER_TAG_ADDRESS
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long address_tag_end - address_tag_start
@@ -37,7 +35,7 @@ address_tag_end:
 
     .align 8
 
-entry_address_tag_start:    
+entry_address_tag_start:
     .short MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long entry_address_tag_end - entry_address_tag_start
@@ -48,13 +46,14 @@ entry_address_tag_end:
 
 #endif /* __ELF__ */
 
-framebuffer_tag_start:  
+framebuffer_tag_start:
     .short MULTIBOOT_HEADER_TAG_FRAMEBUFFER
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long framebuffer_tag_end - framebuffer_tag_start
-    .long OS_WIDTH
-    .long OS_HEIGHT
-    .long 32
+    /* let GRUB choose width, height and depth by setting 0 */
+    .long 0
+    .long 0
+    .long 0
 framebuffer_tag_end:
 
     .align 8
@@ -67,20 +66,20 @@ framebuffer_tag_end:
 
 multiboot_header_end:
 
-    
+
     .section .bss
     .align 16
 stack_bottom:
     .skip 0x4000
 stack_top:
 
-    
+
     .section .text
 
     .global _start
     .type _start, @function
 
-_start: 
+_start:
     mov $stack_top, %esp
 
     /* Reset EFLAGS */
@@ -91,7 +90,7 @@ _start:
     pushl %ebx
     /* Push the magic value */
     pushl %eax
-    
+
     /* Enter the C main function */
     call kernel_main
 
@@ -108,5 +107,5 @@ _start:
        implement call tracing */
     .size _start, . - _start
 
-halt_message:   
+halt_message:
     .asciz "Halted."
