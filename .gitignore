@@ -2,10 +2,13 @@
 tools/
 **/myos
 **/*.iso
+**/TAGS
 
 # emacs files
 **/*~
+**/.*~
 **/\#*
+**/.\#*
 
 # vim files
 **/*.swp

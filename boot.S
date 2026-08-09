@@ -2,40 +2,25 @@
 
 
 #define ASM_FILE 1  /* multiboot2 uses this def */
-#include <multiboot2.h>
-
-/* C symbol format. HAVE_ASM_USCORE is defined by configure */
-#ifdef HAVE_ASM_USCORE
-# define EXT_C(sym)     _ ## sym
-#else
-# define EXT_C(sym)     sym
-#endif
-
-#define STACK_SIZE 0x4000
+#include "multiboot2.h"
 
 #ifdef __ELF__
 # define AOUT_KLUDGE 0
 #else
 # define AOUT_KLUDGE MULTIBOOT_AOUT_KLUDGE
 #endif
-    
-    .text
 
-    .globl start, _start
-
-start:  
-_start: 
-    jmp multiboot_entry
-
+    .section .multiboot
     .align 8
 
 multiboot_header:   
     .long MULTIBOOT2_HEADER_MAGIC
-    .long GRUB_MULTIBOOT_ARCHITECTURE_I386
+    .long 0     /* 0 for i386 */
     /* header length */
-    .long multiboot_header_end - multiboot_header
+    .set HEADER_LENGTH, multiboot_header_end - multiboot_header
+    .long HEADER_LENGTH
     /* checksum */
-    .long -(MULTIBOOT2_HEADER_MAGIC + GRUB_MULTIBOOT_ARCHITECTURE_I386 + (multiboot_header_end - multiboot_header))
+    .long -(MULTIBOOT2_HEADER_MAGIC + HEADER_LENGTH)
 
 #ifndef __ELF__
 
@@ -71,11 +56,23 @@ framebuffer_tag_end:
     .short 0
     .long 8
 
-multiboot_header_end:   
+multiboot_header_end:
 
-multiboot_entry:    
+    
+    .section .bss
+    .align 16
+stack_bottom:
+    .skip 0x4000
+stack_top:
 
-    mov $(stack + STACK_SIZE), %esp
+    
+    .section .text
+
+    .global _start
+    .type _start, @function
+
+_start: 
+    mov $stack_top, %esp
 
     /* Reset EFLAGS */
     pushl $0
@@ -87,11 +84,11 @@ multiboot_entry:
     pushl %eax
     
     /* Enter the C main function */
-    call EXT_C(kernel_main)
+    call kernel_main
 
     /* Print the halt message */
     pushl $halt_message
-    call EXT_C(printf)
+    call terminal_writestring
 
     cli
 1:  hlt
@@ -104,6 +101,3 @@ multiboot_entry:
 
 halt_message:   
     .asciz "Halted."
-    
-    /* Our stack area */
-    .comm stack, STACK_SIZE
