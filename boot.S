@@ -32,14 +32,18 @@ address_tag_start:
     .long _start  /* load_addr */
     .long _edata  /* load_end_addr */
     .long _end    /* bss_end_addr */
-address_tag_end:    
+address_tag_end:
+
+    .align 8
 
 entry_address_tag_start:    
     .short MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS
     .short MULTIBOOT_HEADER_TAG_OPTIONAL
     .long entry_address_tag_end - entry_address_tag_start
     .long multiboot_entry  /* entry_addr */
-entry_address_tag_end:  
+entry_address_tag_end:
+
+    .align 8
 
 #endif /* __ELF__ */
 
@@ -50,11 +54,15 @@ framebuffer_tag_start:
     .long 1024
     .long 768
     .long 32
-framebuffer_tag_end:    
+framebuffer_tag_end:
+
+    .align 8
 
     .short MULTIBOOT_HEADER_TAG_END
     .short 0
     .long 8
+
+    .align 8
 
 multiboot_header_end:
 
