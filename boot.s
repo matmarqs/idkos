@@ -1,68 +1,109 @@
-    /* there is something called the Multiboot Standard. */
-    /* it describes an easy interface between the bootloader and the OS kernel */
-    /* it works by putting a few magic values (the multiboot header), which is searched by the bootloader (GRUB) */
-    /* GRUB will know how to load us, given these magic values. */
-
-    /* multiboot header */
-    .set ALIGN,     1<<0             /* align loaded modules on page boundaries */
-    .set MEMINFO,   1<<1             /* provide memory map */
-    .set FLAGS,     ALIGN | MEMINFO  /* Multiboot 'flag' field */
-    .set MAGIC,     0x1BADB002       /* 'magic number' lets bootloader find the header */
-    .set CHECKSUM,  -(MAGIC + FLAGS) /* checksum of above, to prove we are multiboot */
+/* reference: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html */
 
 
-    /* multiboot header that marks the program as a kernel. these are magic values that */
-    /* are documented in the multiboot standard. the bootloader will search for this signature */
-    /* in the first 8kb of the kernel file, aligned at a 32-bit boundary. the signature is in its */
-    /* own section so the header can be forced to be within the first 8kb of the kernel file */
+#define ASM_FILE 1  /* multiboot2 uses this def */
+#include <multiboot2.h>
 
-    .section .multiboot
-    .align 4
-    .long MAGIC
-    .long FLAGS
-    .long CHECKSUM
+/* C symbol format. HAVE_ASM_USCORE is defined by configure */
+#ifdef HAVE_ASM_USCORE
+# define EXT_C(sym)     _ ## sym
+#else
+# define EXT_C(sym)     sym
+#endif
 
-    /* it is up to the kernel to provide a stack */
-    /* the stack on x86 must be 16-byte aligned according to the System V ABI standard. */
-    /* the compiler assumes the stack is properly aligned and failure to align the stack */
-    /* will result in undefined behavior. */
-    .section .bss
-    .align 16
-stack_bottom:
-    .skip 16834  /* 16 KiB */
-stack_top:
+#define STACK_SIZE 0x4000
 
-    /* the linker script specifies _start as the entry point to the kernel and the bootloader will */
-    /* jump to this position once the kernel has been loaded. it doesn't make sense to return from */
-    /* this function as the bootloader is gone */
-    .section .text
-    .global _start
-    .type _start, @function
-_start:
-    /* the bootloader has loaded us into 32-bit protected mode on a x86 machine. interrupts are disabled. */
-    /* paging is disabled. the processor state is as defined in the multiboot standard. the kernel has full */
-    /* control of the CPU. the kernel can only make use of hardware features and any code it provides as */
-    /* part of itself */
+#ifdef __ELF__
+# define AOUT_KLUDGE 0
+#else
+# define AOUT_KLUDGE MULTIBOOT_AOUT_KLUDGE
+#endif
+    
+    .text
 
-    /* to set up a stack, we set the esp register to point to the top of the stack. */
-    mov $stack_top, %esp
+    .globl start, _start
 
-    /* this is a good place to initialize crucial processor state before the high-level kernel is entered. */
+start:  
+_start: 
+    jmp multiboot_entry
 
-    /* enter the high-level kernel. the ABI requires the stack is 16-byte aligned at the time of the call */
-    /* instruction. */
-    call kernel_main
+    .align 8
 
-    /* if the system has nothing more to do, put the computer into an infinite loop. to do that: */
-    /* 1) disable interrupts with cli */
-    /* 2) wait for the next interrupt to arrive with hlt (halt instruction). */
-    /*    since they are disabled, this will lock up the computer. */
-    /* 3) jump to the hlt instruction if it ever wakes up due to a */
-    /*    non-maskable interrupt occuring or due to system management mode. */
+multiboot_header:   
+    .long MULTIBOOT2_HEADER_MAGIC
+    .long GRUB_MULTIBOOT_ARCHITECTURE_I386
+    /* header length */
+    .long multiboot_header_end - multiboot_header
+    /* checksum */
+    .long -(MULTIBOOT2_HEADER_MAGIC + GRUB_MULTIBOOT_ARCHITECTURE_I386 + (multiboot_header_end - multiboot_header))
+
+#ifndef __ELF__
+
+address_tag_start:  
+    .short MULTIBOOT_HEADER_TAG_ADDRESS
+    .short MULTIBOOT_HEADER_TAG_OPTIONAL
+    .long address_tag_end - address_tag_start
+    .long multiboot_header /* header_addr */
+    .long _start  /* load_addr */
+    .long _edata  /* load_end_addr */
+    .long _end    /* bss_end_addr */
+address_tag_end:    
+
+entry_address_tag_start:    
+    .short MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS
+    .short MULTIBOOT_HEADER_TAG_OPTIONAL
+    .long entry_address_tag_end - entry_address_tag_start
+    .long multiboot_entry  /* entry_addr */
+entry_address_tag_end:  
+
+#endif /* __ELF__ */
+
+framebuffer_tag_start:  
+    .short MULTIBOOT_HEADER_TAG_FRAMEBUFFER
+    .short MULTIBOOT_HEADER_TAG_OPTIONAL
+    .long framebuffer_tag_end - framebuffer_tag_start
+    .long 1024
+    .long 768
+    .long 32
+framebuffer_tag_end:    
+
+    .short MULTIBOOT_HEADER_TAG_END
+    .short 0
+    .long 8
+
+multiboot_header_end:   
+
+multiboot_entry:    
+
+    mov $(stack + STACK_SIZE), %esp
+
+    /* Reset EFLAGS */
+    pushl $0
+    popf
+
+    /* Push the pointer to the Multiboot information structure */
+    pushl %ebx
+    /* Push the magic value */
+    pushl %eax
+    
+    /* Enter the C main function */
+    call EXT_C(kernel_main)
+
+    /* Print the halt message */
+    pushl $halt_message
+    call EXT_C(printf)
+
     cli
 1:  hlt
     jmp 1b
 
-    /* set the size of the _start symbol to the current location '.' minus its start */
-    /* this is useful when debugging or when you implement call tracing */
+    /* set the size of the _start symbol to the current location '.'
+       minus its start. this is useful when debugging or when you
+       implement call tracing */
     .size _start, . - _start
+
+halt_message:   
+    .asciz "Halted."
+    
+    /* Our stack area */
+    .comm stack, STACK_SIZE

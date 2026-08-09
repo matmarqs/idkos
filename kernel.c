@@ -1,3 +1,5 @@
+#include "multiboot2.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -10,33 +12,27 @@
 #error "This tutorial needs to be compiled with i686-elf compiler"
 #endif
 
-enum vga_color {
-    VGA_COLOR_BLACK = 0,
-    VGA_COLOR_BLUE = 1,
-    VGA_COLOR_GREEN = 2,
-    VGA_COLOR_CYAN = 3,
-    VGA_COLOR_RED = 4,
-    VGA_COLOR_MAGENTA = 5,
-    VGA_COLOR_BROWN = 6,
-    VGA_COLOR_LIGHT_GREY = 7,
-    VGA_COLOR_DARK_GREY = 8,
-    VGA_COLOR_LIGHT_BLUE = 9,
-    VGA_COLOR_LIGHT_GREEN = 10,
-    VGA_COLOR_LIGHT_CYAN = 11,
-    VGA_COLOR_LIGHT_RED = 12,
-    VGA_COLOR_LIGHT_MAGENTA = 13,
-    VGA_COLOR_LIGHT_BROWN = 14,
-    VGA_COLOR_WHITE = 15,
-};
+/* use the special renderer for 32 bit truecolor packed pixels */
+#define SSFN_CONSOLEBITMAP_TRUECOLOR
+#include <ssfn.h>
 
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
-{
-    return fg | bg << 4;
-}
+/* set up context by global variables */
+ssfn_src = &_binary_console_sfn_start;      /* the bitmap font to use */
 
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
+ssfn_dst.ptr = 0xE0000000;                  /* address of the linear frame buffer */
+ssfn_dst.w = 1024;                          /* width */
+ssfn_dst.h = 768;                           /* height */
+ssfn_dst.p = 4096;                          /* bytes per line */
+ssfn_dst.x = ssfn_dst.y = 0;                /* pen position */
+ssfn_dst.fg = 0xFFFFFF;                     /* foreground color */
+
+void kernel_main(unsigned long magic, unsigned long addr);
+void printf(const char *format, ...);
+
+void kernel_main(unsigned long magic, unsigned long addr)
 {
-    return (uint16_t) uc | (uint16_t) color << 8;
+    struct multiboot_tag *tag;
+    unsigned size;
 }
 
 size_t strlen(const char *str)
