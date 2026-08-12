@@ -4,13 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef _STDINT
-#define _STDINT
-#endif
-
-#ifndef _UINT64_T
-#define _UINT64_T
-#endif
 
 #if defined(__linux__)
 #error "You are not using a cross-compiler, __linux__ is defined"
@@ -20,20 +13,10 @@
 #error "This kernel needs to be compiled with i686-elf compiler"
 #endif
 
-/* use the special renderer for 32 bit truecolor packed pixels */
-#define SSFN_CONSOLEBITMAP_TRUECOLOR
-#define SSFN_CONSOLEBITMAP_CONTROL /* control chars like '\n' */
-#include "ssfn.h"
-
-extern ssfn_font_t _binary_consolefont_sfn_start;
 
 void kernel_main(unsigned long magic, unsigned long addr);
 
 size_t strlen(const char *str);
-void term_initialize(uint8_t *fb_addr, uint32_t fb_width, uint32_t fb_height, uint32_t fb_pitch);
-void term_putchar(uint32_t unicode);
-void term_write(const char *data, size_t size);
-void term_writestring(const char *data);
 
 
 bool parse_multiboot2(unsigned long magic, unsigned long addr,
@@ -90,38 +73,4 @@ size_t strlen(const char *str)
     while (str[len])
         len++;
     return len;
-}
-
-
-void term_initialize(uint8_t *fb_addr, uint32_t fb_width,
-                     uint32_t fb_height, uint32_t fb_pitch)
-{
-    /* set up context by global variables */
-    ssfn_src = &_binary_consolefont_sfn_start;  /* the bitmap font to use */
-    ssfn_dst.ptr = (uint8_t *) fb_addr;         /* address of the linear frame buffer */
-    ssfn_dst.w = fb_width;                      /* width */
-    ssfn_dst.h = fb_height;                     /* height */
-    ssfn_dst.p = fb_pitch;                      /* bytes per line */
-    ssfn_dst.x = ssfn_dst.y = 0;                /* pen position */
-    ssfn_dst.fg = 0xFFFFFF;                     /* foreground color */
-    ssfn_dst.bg = 0;                            /* background color */
-}
-
-
-void term_putchar(uint32_t c)
-{
-    ssfn_putc(c);
-}
-
-
-void term_write(const char *data, size_t size)
-{
-    for (size_t i = 0; i < size; i++)
-        term_putchar(data[i]);
-}
-
-
-void term_writestring(const char *data)
-{
-    term_write(data, strlen(data));
 }
