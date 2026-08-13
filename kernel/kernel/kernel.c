@@ -1,4 +1,4 @@
-#include "multiboot2.h"
+#include <3rdparty/multiboot2.h>
 
 #include <stdbool.h>
 #include <stddef.h>

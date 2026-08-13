@@ -1,7 +1,7 @@
 /* reference: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html */
 
 #define ASM_FILE 1  /* multiboot2 uses this def */
-#include "multiboot2.h"
+#include <3rdparty/multiboot2.h>
 
 #ifdef __ELF__
 # define AOUT_KLUDGE 0

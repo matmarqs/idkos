@@ -13,7 +13,7 @@
 /* use the special renderer for 32 bit truecolor packed pixels */
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
 #define SSFN_CONSOLEBITMAP_CONTROL /* control chars like '\n' */
-#include "ssfn.h"
+#include <3rdparty/ssfn.h>
 
 extern ssfn_font_t _binary_consolefont_sfn_start;
 
