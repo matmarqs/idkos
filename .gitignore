@@ -1,7 +1,14 @@
+# build directories
+build/
+isodir/
+sysroot/
+
+
 # development tools
 tools/
 **/myos
 **/*.iso
+**/*.kernel
 **/TAGS
 
 # emacs files
