@@ -20,16 +20,19 @@ LIBS :=
 
 CC := $(TARGET_ARCH)-gcc
 AR := $(TARGET_ARCH)-ar
+LD := $(TARGET_ARCH)-ld
 
 MAKEFLAGS += -j$(shell nproc)
 
 KERNEL_NAME := myos.kernel
 KERNEL := $(SYSROOT)$(BOOTDIR)/$(KERNEL_NAME)
-LIBK := $(SYSROOT)$(INCLUDEDIR)/libk.a
+LIBK := $(SYSROOT)$(LIBDIR)/libk.a
+FONT := $(BUILDDIR)/font.o
+FONT_PATH := "/usr/share/kbd/consolefonts/default8x16.psfu.gz"
 
 .PHONY: all run clean
 
-all: run
+all: myos.iso
 
 # We test on x86_64, but the OS is 32-bit x86
 run: myos.iso
@@ -43,6 +46,14 @@ myos.iso: $(KERNEL) grub.cfg
 	cp grub.cfg isodir/boot/grub
 	cp $< isodir/boot
 	grub-mkrescue -o myos.iso isodir
+
+# Be careful: `$LD` generates the symbol _binary_<ARG>_sfn_start
+# based on its last argument <ARG>
+$(FONT): $(BUILDDIR)/consolefont.sfn
+	cd $(BUILDDIR) && $(LD) -r -b binary -o font.o consolefont.sfn
+
+$(BUILDDIR)/consolefont.sfn:
+	tools/scalable-font2/sfnconv/sfnconv -U -B 16 $(FONT_PATH) $@
 
 include libc/Makefile.inc
 include kernel/Makefile.inc

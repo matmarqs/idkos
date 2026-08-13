@@ -9,28 +9,28 @@ KERNEL_LIBS := $(LIBS) $(KERNEL_ARCH_LIBS) -nostdlib -lk -lgcc
 KERNEL_PATH := kernel/kernel
 KERNEL_SRCS := $(shell find $(KERNEL_PATH) -type f -name '*.c' -or -name '*.S')
 
-KERNEL_OBJS := $(KERNEL_SRCS:%.c=$(BUILDDIR)/%.o) $(KERNEL_ARCH_OBJS)
+KERNEL_OBJS := $(KERNEL_SRCS:%.c=$(BUILDDIR)/%.o) $(KERNEL_ARCH_OBJS) $(FONT)
 
 LINK_LIST = \
 $(KERNEL_LDFLAGS) \
 $(KERNEL_OBJS) \
 $(KERNEL_LIBS) \
-font.o
+
 
 .PHONY: install-kernel-headers
 
 all: $(BUILDDIR)/$(KERNEL_NAME)
 
 $(KERNEL): $(BUILDDIR)/$(KERNEL_NAME)
-	mkdir -p $(SYSROOT)$(BOOTDIR)
-	cp $< $(KERNEL)
+	@mkdir -p $(dir $@)
+	cp $< $@
 
-$(BUILDDIR)/$(KERNEL_NAME): $(KERNEL_OBJS) $(KERNEL_ARCHDIR)/linker.ld $(LIBK) font.o
+$(BUILDDIR)/$(KERNEL_NAME): $(KERNEL_OBJS) $(KERNEL_ARCHDIR)/linker.ld $(LIBK) $(FONT)
 	$(CC) -T $(KERNEL_ARCHDIR)/linker.ld -o $@ $(KERNEL_CFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot2 $@
 
 # Copy GCC's internal C runtime files into our build directory
-%/$(KERNEL_ARCHDIR)/crtbegin.o %/$(KERNEL_ARCHDIR)/crtend.o:
+$(BUILDDIR)/$(KERNEL_ARCHDIR)/crtbegin.o $(BUILDDIR)/$(KERNEL_ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(KERNEL_CFLAGS) $(KERNEL_LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 $(BUILDDIR)/kernel/%.o: kernel/%.c
