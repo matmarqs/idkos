@@ -54,7 +54,7 @@ $(FONT): $(BUILDDIR)/consolefont.sfn
 	cd $(BUILDDIR) && $(LD) -r -b binary -o font.o consolefont.sfn
 
 $(BUILDDIR)/consolefont.sfn:
-	tools/scalable-font2/sfnconv/sfnconv -U -B 16 $(FONT_PATH) $@
+	sfnconv -U -B 16 $(FONT_PATH) $@
 
 include libc/Makefile.inc
 include kernel/Makefile.inc

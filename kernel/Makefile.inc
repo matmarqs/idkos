@@ -30,6 +30,7 @@ $(BUILDDIR)/$(KERNEL_NAME): $(KERNEL_OBJS) $(KERNEL_ARCHDIR)/linker.ld $(LIBK) $
 
 # Copy GCC's internal C runtime files into our build directory
 $(BUILDDIR)/$(KERNEL_ARCHDIR)/crtbegin.o $(BUILDDIR)/$(KERNEL_ARCHDIR)/crtend.o:
+	@mkdir -p $(dir $@)
 	OBJ=`$(CC) $(KERNEL_CFLAGS) $(KERNEL_LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 $(BUILDDIR)/kernel/%.o: kernel/%.c
