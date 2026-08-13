@@ -2,12 +2,12 @@
 
 BINARIES := $(BUILDDIR)/libk.a # $(BUILDDIR)/libc.a # Not ready for libc yet
 
-all: $(BINARIES)
+all: $(BINARIES) $(LIBK) install-libc-headers
 
 LIBC_ARCHDIR := libc/arch/$(SUBDIR_ARCH)
 include $(LIBC_ARCHDIR)/make.config
 
-LIBK_CFLAGS := $(CFLAGS) $(LIBK_ARCH_CFLAGS)
+LIBK_CFLAGS := $(CFLAGS) $(LIBK_ARCH_CFLAGS) -ffreestanding
 LIBK_CPPFLAGS := $(CPPFLAGS) $(LIBK_ARCH_CPPFLAGS) -D__is_libk
 
 LIBC_CFLAGS := $(CFLAGS) $(LIBC_ARCH_CFLAGS)
@@ -31,6 +31,10 @@ $(BUILDDIR)/libk.a: $(LIBK_OBJS)
 $(BUILDDIR)/libc.a: $(LIBC_OBJS)
 	$(AR) rcs $@ $^
 
+$(LIBK): $(BUILDDIR)/libk.a
+	@mkdir -p $(dir $@)
+	cp $< $@
+
 $(BUILDDIR)/libc/%.libk.o: libc/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
@@ -40,12 +44,8 @@ $(BUILDDIR)/libc/%.libc.o: libc/%.c
 	$(CC) -c $< -o $@ $(LIBC_CFLAGS) $(LIBC_CPPFLAGS)
 
 install-libc-headers:
-	mkdir -p $(SYSROOT)$(INCLUDEDIR)
-	cp -r --preserve=timestamps include/. $(SYSROOT)$(INCLUDEDIR)/.
-
-$(LIBK): $(BINARIES)
-	mkdir -p $(SYSROOT)$(LIBDIR)
-	cp $(BINARIES) $(SYSROOT)$(LIBDIR)
+	@mkdir -p $(SYSROOT)$(INCLUDEDIR)
+	cp -r --preserve=timestamps libc/include/. $(SYSROOT)$(INCLUDEDIR)/.
 
 -include $(LIBC_OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)

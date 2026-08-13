@@ -1,7 +1,11 @@
+.PHONY: install-kernel-headers
+
+all: $(KERNEL) install-kernel-headers
+
 KERNEL_ARCHDIR := kernel/arch/$(SUBDIR_ARCH)
 include $(KERNEL_ARCHDIR)/make.config
 
-KERNEL_CFLAGS := $(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+KERNEL_CFLAGS := $(CFLAGS) $(KERNEL_ARCH_CFLAGS) -ffreestanding
 KERNEL_CPPFLAGS := $(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS) -D__is_kernel
 KERNEL_LDFLAGS := $(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 KERNEL_LIBS := $(LIBS) $(KERNEL_ARCH_LIBS) -nostdlib -lk -lgcc
@@ -15,11 +19,6 @@ LINK_LIST = \
 $(KERNEL_LDFLAGS) \
 $(KERNEL_OBJS) \
 $(KERNEL_LIBS) \
-
-
-.PHONY: install-kernel-headers
-
-all: $(BUILDDIR)/$(KERNEL_NAME)
 
 $(KERNEL): $(BUILDDIR)/$(KERNEL_NAME)
 	@mkdir -p $(dir $@)
@@ -42,8 +41,8 @@ $(BUILDDIR)/kernel/%.o: kernel/%.S
 	$(CC) -c $< -o $@ $(KERNEL_CFLAGS) $(KERNEL_CPPFLAGS)
 
 install-kernel-headers:
-	mkdir -p $(SYSROOT)$(INCLUDEDIR)
-	cp -R --preserve=timestamps include/. $(SYSROOT)$(INCLUDEDIR)/.
+	@mkdir -p $(SYSROOT)$(INCLUDEDIR)
+	cp -r --preserve=timestamps kernel/include/. $(SYSROOT)$(INCLUDEDIR)/.
 
 -include $(KERNEL_OBJS:.o=.d)
 

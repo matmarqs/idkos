@@ -13,7 +13,7 @@ BOOTDIR := /boot
 INCLUDEDIR := $(PREFIX)/include
 LIBDIR := $(PREFIX)/lib
 
-CFLAGS := -O0 -g -std=gnu11 -ffreestanding -Wall -Wextra
+CFLAGS := -O0 -g -std=gnu11 -Wall -Wextra
 CPPFLAGS := -MD -MP -Ilibc/include -Ikernel/include
 LDFLAGS := -L$(SYSROOT)$(LIBDIR)
 LIBS :=
@@ -27,10 +27,17 @@ MAKEFLAGS += -j$(shell nproc)
 KERNEL_NAME := myos.kernel
 KERNEL := $(SYSROOT)$(BOOTDIR)/$(KERNEL_NAME)
 LIBK := $(SYSROOT)$(LIBDIR)/libk.a
+
 FONT := $(BUILDDIR)/font.o
 FONT_PATH := "/usr/share/kbd/consolefonts/default8x16.psfu.gz"
 
 .PHONY: all run clean
+
+myos.iso: $(KERNEL) grub.cfg
+	mkdir -p isodir/boot/grub
+	cp grub.cfg isodir/boot/grub
+	cp $< isodir/boot
+	grub-mkrescue -o myos.iso isodir
 
 all: myos.iso
 
@@ -40,12 +47,6 @@ run: myos.iso
 
 clean:
 	rm -rf myos.iso isodir/ $(SYSROOT) $(BUILDDIR)
-
-myos.iso: $(KERNEL) grub.cfg
-	mkdir -p isodir/boot/grub
-	cp grub.cfg isodir/boot/grub
-	cp $< isodir/boot
-	grub-mkrescue -o myos.iso isodir
 
 # Be careful: `$LD` generates the symbol _binary_<ARG>_sfn_start
 # based on its last argument <ARG>
