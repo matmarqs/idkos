@@ -1,4 +1,4 @@
-.PHONY: install-libc install-libc-headers
+.PHONY: install-libc-headers
 
 BINARIES := $(BUILDDIR)/libk.a # $(BUILDDIR)/libc.a # Not ready for libc yet
 
@@ -43,7 +43,7 @@ install-libc-headers:
 	mkdir -p $(SYSROOT)$(INCLUDEDIR)
 	cp -r --preserve=timestamps include/. $(SYSROOT)$(INCLUDEDIR)/.
 
-install-libc: $(BINARIES)
+$(LIBK): $(BINARIES)
 	mkdir -p $(SYSROOT)$(LIBDIR)
 	cp $(BINARIES) $(SYSROOT)$(LIBDIR)
 

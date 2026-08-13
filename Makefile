@@ -5,9 +5,8 @@
 TARGET_ARCH ?= i686-elf
 SUBDIR_ARCH ?= i386
 
-BASEPATH := $(shell pwd)
-SYSROOT := $(BASEPATH)/sysroot
-BUILDDIR := $(BASEPATH)/build
+SYSROOT := sysroot
+BUILDDIR := build
 
 PREFIX := /usr
 BOOTDIR := /boot
@@ -15,8 +14,8 @@ INCLUDEDIR := $(PREFIX)/include
 LIBDIR := $(PREFIX)/lib
 
 CFLAGS := -O0 -g -std=gnu11 -ffreestanding -Wall -Wextra
-CPPFLAGS := -MD -MP -I$(BASEPATH)/libc -I$(BASEPATH)/kernel
-LDFLAGS :=
+CPPFLAGS := -MD -MP -Ilibc/include -Ikernel/include
+LDFLAGS := -L$(SYSROOT)$(LIBDIR)
 LIBS :=
 
 CC := $(TARGET_ARCH)-gcc
@@ -45,5 +44,5 @@ myos.iso: $(KERNEL) grub.cfg
 	cp $< isodir/boot
 	grub-mkrescue -o myos.iso isodir
 
-include $(BASEPATH)/libc/Makefile.inc
-include $(BASEPATH)/kernel/Makefile.inc
+include libc/Makefile.inc
+include kernel/Makefile.inc
