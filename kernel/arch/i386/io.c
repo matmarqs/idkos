@@ -40,6 +40,13 @@ static inline void lidt(void *base, uint16_t size) {
     asm("lidt %0" : : "m"(IDTR));
 }
 
+int poll_keyboard(void) {
+    while ((inb(0x64) & 1) == 0) {
+        ;
+    }
+    return inb(0x60);
+}
+
 int get_cpu_vendor_string(char vendor_string[13]) {
     unsigned int eax, ebx, ecx, edx;
     eax = 0;
