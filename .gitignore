@@ -8,6 +8,7 @@ sysroot/
 tools/
 **/myos
 **/*.iso
+**/*.img
 **/*.kernel
 **/TAGS
 
