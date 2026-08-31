@@ -30,3 +30,13 @@ dd bs=512 if=os.img of=os-image.img conv=notrunc
 wc -c os-image.img                  # Needs to have 8192 bytes (16 sectors)
 qemu-system-i386 os-image.img
 ```
+
+# linker with kernel_entry
+
+```
+nasm kernel_entry.asm -f elf -o kernel_entry.o
+ld -o kernel.bin -Ttext 0x1000 kernel_entry.o kernel.o --oformat binary
+cat boot_sect.bin kernel.bin > os.img
+dd bs=512 count=16 if=/dev/zero of=os-image.img
+dd bs=512 if=os.img of=os-image.img conv=notrunc
+```
