@@ -11,6 +11,9 @@ tools/
 **/*.img
 **/*.kernel
 **/TAGS
+.cache/
+.clangd
+compile_commands.json
 
 # emacs files
 **/*~
