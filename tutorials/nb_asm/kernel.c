@@ -1,3 +1,5 @@
+unsigned char port_byte_in(unsigned short port);
+
 int main() {
   char *video_memory = (char *)0xb8000;
 

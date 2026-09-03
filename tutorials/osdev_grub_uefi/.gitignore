@@ -3,6 +3,7 @@ build/
 isodir/
 sysroot/
 
+
 # development tools
 tools/
 **/myos
@@ -10,9 +11,9 @@ tools/
 **/*.img
 **/*.kernel
 **/TAGS
-**/.cache/
-**/.clangd
-**/compile_commands.json
+.cache/
+.clangd
+compile_commands.json
 
 # emacs files
 **/*~
