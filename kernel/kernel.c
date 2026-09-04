@@ -1,9 +1,8 @@
 #include <libk.h>
-#include <vga.h>
 
 int main() {
-  term_init();
-  term_clear();
-  term_print("Hello, kernel!");
-  return 0;
+    screen_init();
+    putchar('K');
+    putchar('\n');
+    return 0;
 }

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-size_t strlen(const char *str);
+void screen_init();
+int putchar(int ic);
 
 #endif /* _LIBK_H */
