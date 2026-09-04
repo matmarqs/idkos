@@ -11,7 +11,7 @@ KERNEL_OFFSET equ 0x1000    ; memory offset which we will load our kernel
 
     call load_kernel        ; load our kernel
 
-    ;call switch_to_pm       ; switch to protected mode, from which we will not return
+    call switch_to_pm       ; switch to protected mode, from which we will not return
 
     jmp $                   ; Hang
 
