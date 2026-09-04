@@ -1,13 +1,14 @@
 # build directories
-build/
-isodir/
-sysroot/
+**/build/
+**/isodir/
+**/sysroot/
 
 # development tools
 tools/
 **/myos
 **/*.iso
 **/*.img
+**/*.bin
 **/*.kernel
 **/TAGS
 **/.cache/
@@ -23,7 +24,6 @@ tools/
 # vim files
 **/*.swp
 **/.*.swp
-
 
 # C files (GitHub template)
 
