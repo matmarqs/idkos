@@ -17,7 +17,7 @@ K_DEPS := $(K_OBJS:.o=.d)
 .PHONY: run clean
 
 run: os.img
-	qemu-system-i386 -drive format=raw,file=$<
+	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio # -S -gdb tcp::12345 # (we need a GDB stub)
 
 clean:
 	rm -f os.img kernel.bin boot.bin kernel_entry.o $(K_OBJS) $(K_DEPS)
