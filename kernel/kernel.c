@@ -2,7 +2,7 @@
 
 int main() {
     screen_init();
-    putchar('K');
-    putchar('\n');
+    print("Hello Kernel!\n");
+    print("How are you?");
     return 0;
 }

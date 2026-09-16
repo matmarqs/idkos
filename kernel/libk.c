@@ -1,6 +1,7 @@
 #include <libk.h>
 #include <vga.h>
 #include <cursor.h>
+#include <string.h>
 
 void screen_init() {
     term_init();
@@ -8,6 +9,16 @@ void screen_init() {
 }
 
 int putchar(int ic) {
-    term_putchar((char) ic);
+    term_putchar((char)ic);
+    cursor_set_offset(term_get_offset());
     return ic;
+}
+
+int print(char *str) {
+    int len = strlen(str);
+    for (int i = 0; i < len; i++) {
+        term_putchar(str[i]);
+    }
+    cursor_set_offset(term_get_offset());
+    return len;
 }

@@ -7,5 +7,6 @@
 
 void screen_init();
 int putchar(int ic);
+int print(char *str);
 
 #endif /* _LIBK_H */
